@@ -1,8 +1,8 @@
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native'
 import React, { useEffect, useState } from 'react'
 
-const maxAttempts = 20;
-const words = ["kedi"]
+const maxAttempts = 6;
+const words = ["kedi", "kopek"]
 
 const App = () => {
 
@@ -16,10 +16,20 @@ const App = () => {
   const [gameOver, setgameOver] = useState(false);
 
   const randomWord = () => {
+    console.log("calisti")
     const word = Math.floor(Math.random() * words.length);
     setWord(words[word]);
   }
 
+  const playAgain = () => {
+    const word = Math.floor(Math.random() * words.length);
+
+    setgameOver(false);
+    setAttempt(0);
+    setDispledWord("_".repeat(words[word].length));
+    setWord(words[word]);
+    setSelectedLetters(new Set());
+  }
 
   useEffect(() => {
     randomWord();
@@ -28,9 +38,8 @@ const App = () => {
 
 
   const handleLetterClick = (letter: string) => {
-    setAttempt((prev) => prev + 1);
-
-    if (attempt === maxAttempts - 1) {
+    if (attempt === maxAttempts) {
+      Alert.alert("Oyunu Kaybettin Tekrar Oynamak için Yeniden Oynaya Tıkla !!");
       setgameOver(true)
       return
     }
@@ -44,14 +53,20 @@ const App = () => {
     setSelectedLetters(newSelectedLetters);
     //console.log(newSelectedLetters)
 
+    if (!word.includes(letter)) {
+      //console.log("giris")
+      setAttempt((prev) => prev + 1);
+    }
+
     if (word.includes(letter)) {
       const newDisplayword = word.split("").map((letter) => newSelectedLetters.has(letter) ? letter : '_').join("");
       console.log(newDisplayword, "new")
       setDispledWord(newDisplayword);
-      console.log(displedWord , "old")
+      console.log(displedWord, "old")
 
       if (newDisplayword === word) {
-        console.log("girdi")
+        Alert.alert("Oyunu kazandın !!");
+        //console.log("girdi")
         setgameOver(true);
         return
       }
@@ -67,7 +82,7 @@ const App = () => {
       return (
         <TouchableOpacity
           onPress={() => handleLetterClick(letter)}
-          style={[styles.button]}
+          style={[styles.button, { backgroundColor: selectedLetters.has(letter) ? 'gray' : styles.button.backgroundColor }]}
           key={letter}
           disabled={gameOver}
 
@@ -95,9 +110,9 @@ const App = () => {
 
       {
         gameOver && (
-          <TouchableOpacity>
-            <View>
-              <Text>Play Again</Text>
+          <TouchableOpacity onPress={playAgain}>
+            <View style={{ padding: 15, backgroundColor: 'lightblue' }}>
+              <Text style={{ fontWeight: 'bold', color: 'green' }}>Play Again</Text>
             </View>
           </TouchableOpacity>
         )
