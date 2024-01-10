@@ -1,118 +1,118 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import React, { useEffect, useState } from 'react'
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const maxAttempts = 20;
+const words = ["kedi"]
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
+const App = () => {
 
-type SectionProps = PropsWithChildren<{
-  title: string;
-}>;
+  const [displedWord, setDispledWord] = useState("");
+  const [word, setWord] = useState("")
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  const [selectedLetters, setSelectedLetters] = useState(new Set())
+
+  const [attempt, setAttempt] = useState(0);
+
+  const [gameOver, setgameOver] = useState(false);
+
+  const randomWord = () => {
+    const word = Math.floor(Math.random() * words.length);
+    setWord(words[word]);
+  }
+
+
+  useEffect(() => {
+    randomWord();
+  }, [])
+
+
+
+  const handleLetterClick = (letter: string) => {
+    setAttempt((prev) => prev + 1);
+
+    if (attempt === maxAttempts - 1) {
+      setgameOver(true)
+      return
+    }
+
+    if (selectedLetters.has(letter) || gameOver) {
+      return
+    }
+
+    const newSelectedLetters = new Set(selectedLetters);
+    newSelectedLetters.add(letter);
+    setSelectedLetters(newSelectedLetters);
+    //console.log(newSelectedLetters)
+
+    if (word.includes(letter)) {
+      const newDisplayword = word.split("").map((letter) => newSelectedLetters.has(letter) ? letter : '_').join("");
+      console.log(newDisplayword, "new")
+      setDispledWord(newDisplayword);
+      console.log(displedWord , "old")
+
+      if (newDisplayword === word) {
+        console.log("girdi")
+        setgameOver(true);
+        return
+      }
+    }
+
+
+  }
+
+  const renderAlphabetButtons = (): any => {
+    const alphabet = 'abcdefghijklmnoprstuvyz';
+
+    return alphabet.split("").map((letter) => {
+      return (
+        <TouchableOpacity
+          onPress={() => handleLetterClick(letter)}
+          style={[styles.button]}
+          key={letter}
+          disabled={gameOver}
+
+        >
+          <Text style={{ fontWeight: 'bold', color: 'black' }}>{letter.toUpperCase()}</Text>
+        </TouchableOpacity>
+      )
+
+    })
+
+  }
+
   return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+      <Text style={{ fontWeight: 'bold', fontSize: 26, color: 'green' }}>Adam Asmaca</Text>
+      <View style={{ padding: 20, alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ fontSize: 22, letterSpacing: 5 }}>{displedWord}</Text>
+      </View>
+
+      <View style={{ flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center' }}>{renderAlphabetButtons()}</View>
+
+      <View style={{ marginTop: 25 }}>
+        <Text style={{ fontWeight: 'bold', color: 'black', fontSize: 18 }}>Attempt : {maxAttempts - attempt}</Text>
+      </View>
+
+      {
+        gameOver && (
+          <TouchableOpacity>
+            <View>
+              <Text>Play Again</Text>
+            </View>
+          </TouchableOpacity>
+        )
+      }
     </View>
-  );
+  )
 }
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
-
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
 
 const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+  button: {
+    padding: 20,
+    backgroundColor: 'green',
+    margin: 5
+  }
+})
 
-export default App;
+export default App
